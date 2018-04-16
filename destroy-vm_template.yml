@@ -3,19 +3,19 @@
   connection: local
   gather_facts: false
   tasks:
-  - name: Disassociate the elastic IP from the aws master node
+  - name: Disassociate the elastic IP from the aws node
     ec2_eip:
       region: sa-east-1
       device_id: '{{instance_ids}}'
       ip: '{{master_public_ip}}'
       state: absent
       release_on_disassociation: yes
-  - name: Destroy the RHEL 7.4 VM of the aws master node
+  - name: Destroy the RHEL 7.4 VM of the aws node
     ec2:
       region: sa-east-1
       instance_ids: '{{instance_ids}}'
       state: absent
-  - name: Destroy the Security Group of the aws master node
+  - name: Destroy the Security Group of the aws node
     ec2_group:
       region: sa-east-1
       group_id: '{{group_id}}'
@@ -23,14 +23,21 @@
     register: ec2_group_result
     retries: 20
     delay: 10
-    until: ec2_group_result|succeeded
+    until: ec2_group_result is succeeded
   - name: Delete Ansible inventory file
     file:
       path: ./hosts
       state: absent
+  - name: Delete destroy VM file
+    file:
+      path: ./destroy-vm-{{instance_type}}.yml
+      state: absent
   - name: Delete a EC2 key
-        ec2_key:
-            name: '{{awsKey_name}}'
-            region: us-west-1
-#  absent means delete keypair
-            state: absent
+    ec2_key:
+      name: '{{awsKey_name}}'
+      region: sa-east-1
+      state: absent
+  - name: Delete awskey file
+    file:
+      path: ./{{awsKey_name}}.pem
+      state: absent

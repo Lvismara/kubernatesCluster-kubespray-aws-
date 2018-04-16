@@ -4,20 +4,21 @@ nodes
 etcd
 
 [masters]
-{{master_public_ip1}}
+{{master_public_ip1| default('0.0.0.0')}} ansible_ssh_private_key_file=~/.ssh/{{master_awsKey_name| default('0')}}.pem
 
 [etcd]
-{{master_public_ip1}}
+{{master_public_ip1| default('0.0.0.0')}} ansible_ssh_private_key_file=~/.ssh/{{master_awsKey_name| default('0')}}.pem
 
 [nodes]
-{{master_public_ip1}}
+{{node_public_ip1| default('0.0.0.0') }} ansible_ssh_private_key_file=~/.ssh/{{node_awsKey_name| default('0')}}.pem
 
 [OSEv3:vars]
 ansible_user=ec2-user
 ansible_become=yes
-ansible_ssh_private_key_file=~/.ssh/{{awsKey_name}}.pem
 ansible_ssh_extra_args="-o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ControlMaster=auto -o ControlPersist=60s"
-master_domain=ec2-{{master_public_ip2}}.sa-east-1.compute.amazonaws.com
+master_domain=ec2-{{master_public_ip2| default('0.0.0.0')}}.sa-east-1.compute.amazonaws.com
+node_domain=ec2-{{node_public_ip2| default('0.0.0.0')}}.sa-east-1.compute.amazonaws.com
+
 
 enable_excluders=False
 enable_docker_excluder=False
