@@ -1,0 +1,41 @@
+---
+- hosts: all
+  gather_facts: false
+  vars:
+    - key_name: chaveKube.pem
+  tasks:
+  - name: Install pip
+    command: sudo easy_install pip
+  - name: Install ansible
+    pip:
+     name: ansible
+     state: latest
+  - name: Install yum items required by kubernetes
+    yum:
+     name: '{{ item }}'
+     state: latest
+    loop:
+      - yum-utils
+      - wget
+      - https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+      - python-httplib2
+  - name: Add the user 'jenkins' with a specific uid and a primary group of 'root'
+    user:
+     name: jenkins
+     comment: jenkins user for ssh connection
+     uid: 2001
+     group: root
+  - name: Update the user on etc/sudoers file with NOPASSWD
+    lineinfile:
+     path: /etc/sudoers
+     insertafter: '{{ item }}'
+     regexp: '^jenkins	ALL=(ALL:ALL) NOPASSWD: ALL'
+     line: 'jenkins	ALL=(ALL:ALL) NOPASSWD: ALL'
+    loop:
+      - '^\[root ALL=(ALL:ALL) ALL\]$'
+      -  '^\[#includedir /etc/sudoers.d\]$'
+  - name: Set authorized key for user jenkins copying it from current user
+    authorized_key:
+     user: root
+     state: present
+     key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"

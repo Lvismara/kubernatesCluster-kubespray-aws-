@@ -1,0 +1,19 @@
+# Kubernetes cluster inventory
+
+[kube-master]
+
+[etcd]
+
+[kube-node]
+
+
+[k8s-cluster:children]
+kube-node
+kube-master
+
+[k8s-cluster:vars]
+ansible_user=ec2-user
+ansible_become=yes
+ansible_ssh_extra_args="-o StrictHostKeyChecking=no"
+ansible_ssh_private_key_file=chaveKube.pem
+ansible_python_interpreter=/usr/bin/python
